@@ -4,7 +4,7 @@ Impementa:Pool de conexiones, manejo de excepciones, logging de operaciones"""
 
 from typing import Optional, Dict, Any, List
 from pymongo import MongoClient, ASCENDING, DESCENDING
-from pymongo.errors import ConnectionFailure, OperationFailure,DuplicateKeyError
+from pymongo.errors import ConnectionFailure, OperationFailure, DuplicateKeyError
 from pymongo.collection import Collection
 from contextlib import contextmanager
 import logging
@@ -69,6 +69,16 @@ class DatabaseManager:
     def __del__(self):
         self.close()
 db_manager = DatabaseManager()
+
+@contextmanager
+def transaction_scope():
+    try:
+        yield db_manager
+    except Exception as e:
+        logging.error(f"Error en transaccion: {e}")
+        raise
+
+
 
         
                            

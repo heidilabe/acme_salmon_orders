@@ -3,6 +3,7 @@
 import os
 from dataclasses import dataclass
 from typing import Final
+
 @dataclass(frozen=True)
 class DatabaseConfig:
     """Configuracion inmutable de la base de datos
@@ -16,13 +17,13 @@ class DatabaseConfig:
     @property
     def connection_string(self) -> str:
         """
-        Genera la cadena de conexion a MongoDB
-        """
+        Genera la cadena de conexion a MongoDB corregida"""
+        
         if self.USER and self.PASSWORD:
-            return f"mongodb://{self.USER},{self.PASSWORD}@{self.HOST}"
-        return f"mongodb://{self.HOST},{self.PORT}/{self.DB_NAME}"
-    @dataclass(frozen=True)
-    class AppConfig:
+            return f"mongodb://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DB_NAME}"
+        return f"mongodb://{self.HOST}:{self.PORT}/{self.DB_NAME}"
+@dataclass(frozen=True)
+class AppConfig:
         """
         Configuracion de la aplicacion.
         """

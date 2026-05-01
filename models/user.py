@@ -42,16 +42,36 @@ def update_last_login(self)-> None:
 def to_dict(self)-> dict:
     """Serializacion segura  (excluye datos sensibles)."""
     return {
-        "username": self.username,
-        "role": self.role,
-        "is_active": self.is_active,
-        "last_login": self.last_login,
-        "created_at": self.created_at
+    "username": self.username,
+    "role": self.role,
+    "is_active": self.is_active,
+    "last_login": self.last_login,
+    "created_at": self.created_at
     }
 class Administrator(User):
    """ Perfil Administrador:Control total del sistema. """
 def __init__(self, username: str, password_hash: str):
-         super().__init__(username, password_hash, role='administrador')
+    super().__init__(username, password_hash, role='administrador')
+def can_manage_inventory(self)->bool:
+    return True
+def can_view_reports(self)-> bool:
+   return True
+def can_sell(self)-> bool:
+   return False
+class Seller(User):
+   """  Perfil Vendedor: Operaciones de venta limitadas."""
+def __init__(self, username: str, password_hash: str):
+    super().__init__(username, password_hash, role='vendedor')
+def can_manage_inventory(self)-> bool:
+    return False
+def can_view_reports(self)-> bool:
+    return False
+def can_sell(self)-> bool:
+   return True
+
+       
+
+
         
    
 

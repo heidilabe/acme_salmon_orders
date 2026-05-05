@@ -13,12 +13,9 @@ class DatabaseConfig:
     DB_NAME: str = os.getenv("MONGO_DB","acme_salmon_db")
     USER: str = os.getenv("MONGO_USER","")
     PASSWORD: str = os.getenv("MONGO_PASSWORD","")
-
     @property
     def connection_string(self) -> str:
-        """
-        Genera la cadena de conexion a MongoDB corregida"""
-        
+        """Genera la cadena de conexion a MongoDB corregida"""
         if self.USER and self.PASSWORD:
             return f"mongodb://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DB_NAME}"
         return f"mongodb://{self.HOST}:{self.PORT}/{self.DB_NAME}"

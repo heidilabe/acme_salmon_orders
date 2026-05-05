@@ -20,8 +20,8 @@ class InventoryService:
     Responsabilidad unica: gestionar stock y ventas.
     """
 
-    @classmethod
-    def initialize_inventory(cls) -> None:
+@classmethod
+def initialize_inventory(cls) -> None:
         """ inicializa stock si esta vacio."""
         products_collection = db_manager.products
         if products_collection.count_documents({}) > 0:
@@ -38,18 +38,18 @@ class InventoryService:
             initial_products.append(product.to_dict())
         products_collection.insert_many(initial_products)
         print("Inventario inicializado con 10kg por tipo salmon")
-    @classmethod
-    def get_all_products(cls) -> List[SalmonProduct]:
+@classmethod
+def get_all_products(cls) -> List[SalmonProduct]:
         """Obtiene todos los productos activos."""
         cursor = db_manager.products.find({"is_active": True})
         return [SalmonProduct.from_dict(doc) for doc in cursor]
-    @classmethod
-    def get_product(cls,salmon_type: str) ->Optional[SalmonProduct]:
+@classmethod
+def get_product(cls,salmon_type: str) ->Optional[SalmonProduct]:
         """Obtiene producto por tipo."""
         doc = db_manager.products.find_one({" salmon_type": salmon_type,"is_active":True})
         return SalmonProduct.from_dict(doc)if doc else None
-    @classmethod
-    def update_stock(cls,salmon_type: str, amount_kg: float,
+@classmethod
+def update_stock(cls,salmon_type: str, amount_kg: float,
         is_addition: bool, admin_username: str)-> SalmonProduct:
         """ Actualiza stock(agregar o quitar).
         Atomicidad: operacion de una sola escritura en MongoDB."""
@@ -85,8 +85,8 @@ class InventoryService:
             f"{salmon_type}:{'+' if is_addition else '-'}{amount_kg}kg"
                 )
             return product
-    @classmethod
-    def update_prices(cls,salmon_type: str, new_sale: float, new_purchase: float, admin_username: str)-> SalmonProduct:
+@classmethod
+def update_prices(cls,salmon_type: str, new_sale: float, new_purchase: float, admin_username: str)-> SalmonProduct:
                 """ Actualiza precios de producto"""
                 product = cls.get_product(salmon_type)
                 if not product:
@@ -107,6 +107,7 @@ class InventoryService:
                     f"{salmon_type}: venta=${new_sale}, compra=${new_purchase}"
  )
                 return product
+                
 @classmethod
 def register_sale(cls, seller_username: str, items_data: List[Dict],
                 customer_name: Optional[str] = None,
@@ -138,7 +139,6 @@ def register_sale(cls, seller_username: str, items_data: List[Dict],
                 quantity_kg=quantity,
                 unit_price= product.sale_price,
                 purchase_price= product.purchase_price
-
             )
             sale.validate_sale()
 
@@ -160,8 +160,8 @@ def register_sale(cls, seller_username: str, items_data: List[Dict],
                 f"Venta #{sale.sale_id} por ${sale.total_amount:,.0f}"
                 )
                 return sale
-            @classmethod
-            def get_sales_history(cls,limit: int = 50, salmon_type:Optional[str]= None)->List[Sale]:
+@classmethod
+def get_sales_history(cls,limit: int = 50, salmon_type:Optional[str]= None)->List[Sale]:
                 """ Obtiene historial de ventas"""
                 query = {}
                 if salmon_type:

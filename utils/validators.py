@@ -56,7 +56,7 @@ class InputValidator:
         salmon_type = salmon_type.strip().lower()
         valid_ids = [t[0] for t in valid_types]
         if salmon_type not in valid_ids:
-            raise ValidationError(f"Tipo de salmon invalido. Opciones:{",".join(valid_ids)}")
+            raise ValidationError(f"Tipo de salmon invalido. Opciones:{','.join(valid_ids)}")
         return salmon_type
     @staticmethod
     def validate_kg_amount(kg: str)-> float:

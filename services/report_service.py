@@ -1,35 +1,50 @@
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 from collections import Counter
+
 from database.mongo_manager import db_manager
-from  models.product import SalmonProduct
-from models.product import Sale
+from models.sale import Sale
+from models.product import SalmonProduct
 from services.inventory_service import InventoryService
 class ReportService:
-   "" "Generacion reportes de negocio, Optimiza con agregaciones de MongoDB cuando es posible """
+   """Generacion reportes de negocio, Optimiza con agregaciones de MongoDB cuando es posible """
    @classmethod
    def get_cost_profit_relation(cls)-> List[Dict]:
         """ Rporte: coste-ganancia por tipo de salmon
-        Incluye: ventas totales,costo,ingreso ganancia neta, margen %"""
+        Incluye: ventas totales,costo,ingreso ganancia neta, margen %."""
+        pipeline = [
+            {"$unwind": "$items"},
+            {
+                "$group": {
+                    "_id": "$items.salmon_type",
+                    "total_kg_sold": {"$sum": "$items.quantity_kg"},
+                    "total_revenue": {"$sum": "$items.subtotal"},
+                    "total_profit": {"$sum": "$total_profit"},  # Simplificado, idealmente calcular por item
+                    "sale_count": {"$sum": 1}
+                }
+            },
+            {"$sort": {"total_revenue": -1}}
+        ]
         sales = InventoryService.get_sales_history(limit=1000)
         stats = {}
         for sale in sales:
             for item in sale.items:
                 salmon_type = item.salmon_type
-                if salmon_type not in stats:
-                    stats[salmon_type]={
-                    "total_kg": 0,
-                    "total_costo":0,
-                    "sales_count":0
-                    }
-                    product = InventoryService.get_product(salmon_type)
-                    purchase_price = product.purchase_price if product else 0
-                    stats[salmon_type]["total_kg"] += item.quantity_kg
-                    stats[salmon_type]["total_revenue"]+= item.subtotal
-                    stats[salmon_type]["total_cost"] += item.quantity_kg * purchase_price
-                    stats[salmon_type]["sales_count"] += 1
-                    report = []
-                    for salmon_type, data in stats.items():
+            if salmon_type not in stats:
+                stats[salmon_type]= {
+                "total_kg": 0,
+                "total_revenue":0,
+                 "total_costo":0,
+                "sales_count":0
+            }
+                product = InventoryService.get_product(salmon_type)
+                purchase_price = product.purchase_price if product else 0
+                stats[salmon_type]["total_kg"] += item.quantity_kg
+                stats[salmon_type]["total_revenue"]+= item.subtotal
+                stats[salmon_type]["total_cost"] += item.quantity_kg * purchase_price
+                stats[salmon_type]["sales_count"] += 1
+                report = []
+                for salmon_type, data in stats.items():
                         product = InventoryService.get_product(salmon_type)
                         name = product.name if product else salmon_type
                         total_cost = data["total_cost"]

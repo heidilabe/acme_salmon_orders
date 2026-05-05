@@ -14,49 +14,41 @@ class AuthenticationError(Exception):
     """
 pass
 
-class AutheService:
+class AuthService:
     """ 
     Servicio de autentificacion y gestion de sesiones
     """
-    _current_sesion: Optional[Session]= None
+    _current_session: Optional[Session]= None
     @classmethod
     def initialize_default_users(cls)-> None:
         """
         Crea usuarios por defecto si no existen.
         """
-        users_colletion = db_manager.users
-        if users_colletion.count_documents({})> 0:
+        users_collection = db_manager.users
+        if users_collection.count_documents({})> 0:
             return
         admin = Administrator(
             username="admin",
             password_hash=User.hash_password("Admin@2024!")
-
-
-        )
+ )
         seller = Seller(
             username="vendedor",
             password_hash=User.hash_password("Vendedor@2024!")
-
-
-        )
-        users_colletion.insert_many([
+)
+        users_collection.insert_many([
             {
                 "username": admin.username,
                 "password_hash": admin.password_hash,
                 "role": admin.role,
-                "is active":admin.is_active,
+                "is_active":admin.is_active,
                 "created_at": admin.created_at
-
-
-            },
+ },
             {
                 "username":seller.username,
                 "password_hash": seller.password_hash,
                 "role": seller.role,
                 "is_active": seller.is_active,
                 "created_at": seller.created_at
-
-
             }
         ])
         print("Usuarios por defecto creados:")
@@ -86,9 +78,7 @@ class AutheService:
             if is_blocked:
                 raise AuthenticationError(
                     "cuenta bloqueada tras 3 intentos fallidos. Espere 5 minutos."
-
-
-                )
+            )
             raise AuthenticationError("credenciales invalidas")
         LoginAttemptTracker.reset(username)
         user.update_last_login()
@@ -100,7 +90,6 @@ class AutheService:
         Session = Session(
             username=user.username,
             role=user.role
-
         )
         cls._current_session = Session
         AuditLogger.log_action(username,"LOGIN", "Autenticacion exitosa")
@@ -123,28 +112,25 @@ class AutheService:
     @classmethod
     def logout(cls)-> None:
         """Cierra sesion actual."""
-        if cls._current_sesion:
+        if cls._current_session:
             AuditLogger.log_action(
-                cls._current_sesion.username,
-                "LOGOUT", "Cierre de sesion"
-
-
-
+                cls._current_session.username,
+                "LOGOUT", "Cierre de sesion" 
             )
-            cls._current_sesion = None
+            cls._current_session = None
     @classmethod
     def require_auth(cls,required_role: Optional[str] = None)-> Session:
-        ssesion = cls._get_current_session()
+        """ Verificacion para rutas protegidas"""
+        ssesion = cls.get_current_session()
         if not ssesion:
             raise AuthenticationError("Sesion no iniciada o expirada")
         if required_role and Session.role != required_role:
             AuditLogger.log_action(
-                ssesion.username,
-                "ACCESS_DENIED",
-                f"Requiere:{required_role}"
+                Session.username,
+                "ACCESS_DENIED", 
+                f"Requiere: {required_role}"
 
-
-            )
+                )
             raise AuthenticationError("Permisos insuficientes")
         ssesion.update_activity()
         return ssesion

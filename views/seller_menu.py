@@ -234,6 +234,8 @@ class SellerMenu:
         print(f"\nHasta pronto, {self.username}")
         AuthService.logout()
 
+        
+
                     
                 
 

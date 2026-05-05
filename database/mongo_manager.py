@@ -27,9 +27,9 @@ class DatabaseManager:
         try:
             self._client = MongoClient(
                 DB_CONFIG.connection_string,
-                serverSelectionTimeousMS = 5000,
+                serverSelectionTimeoutMS = 5000,
                 maxPoolSize = 10,
-                minPoolsize = 1,
+                minPoolSize = 1,
             )
             self._client.admin.command('ping')
             self._db = self._client[DB_CONFIG.DB_NAME]
@@ -42,7 +42,7 @@ class DatabaseManager:
         except Exception as e:
             logging.error(f"Error inesperado en conexion: {e}")
             return False
-    def _create_indexes(self)-> None:
+    def create_indexes(self)-> None:
         self._db.users.create_index("username", unique = True)
         self._db.sales.create_index([("salmon_type",ASCENDING),("date",DESCENDING)])
         self._db.products.create_index("salmon_type",unique = True)
